@@ -1,7 +1,9 @@
-
+-- ==============================================================================
+-- INVENTORY & STOCK CONTROL SYSTEM - SUPABASE POSTGRESQL SCHEMA
+-- Migration: 01_initial_schema.sql
+-- ==============================================================================
 
 -- 1. EXTENSIONS & PREREQUISITES
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- 2. CUSTOM ENUMS
@@ -38,7 +40,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 -- 4. LOCATIONS & STAFF ASSIGNMENTS
 -- ------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.locations (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
     code TEXT NOT NULL UNIQUE,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
@@ -56,14 +58,14 @@ CREATE TABLE IF NOT EXISTS public.location_assignments (
 -- 5. CATEGORIES & ITEMS
 -- ------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.categories (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL UNIQUE,
     description TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS public.items (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     sku TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL,
     description TEXT,
@@ -84,7 +86,7 @@ CREATE INDEX IF NOT EXISTS idx_items_is_archived ON public.items(is_archived);
 -- 6. APPEND-ONLY STOCK LEDGER (stock_movements)
 -- ------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.stock_movements (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     item_id UUID NOT NULL REFERENCES public.items(id) ON DELETE RESTRICT,
     movement_type movement_type_enum NOT NULL,
     adjustment_direction adjustment_direction_enum,
@@ -114,7 +116,7 @@ CREATE INDEX IF NOT EXISTS idx_stock_movements_dest_loc ON public.stock_movement
 CREATE INDEX IF NOT EXISTS idx_stock_movements_created_at ON public.stock_movements(created_at);
 
 -- ------------------------------------------------------------------------------
--- 7. IMMUTABILITY TRIGGER (Strictly blocks UPDATE & DELETE on Ledger)
+-- 7. IMMUTABILITY TRIGGER (Blocks UPDATE and DELETE on Ledger)
 -- ------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.prevent_immutable_mutation()
 RETURNS TRIGGER AS $$
@@ -132,7 +134,7 @@ FOR EACH ROW EXECUTE FUNCTION public.prevent_immutable_mutation();
 -- 8. AUDIT LOGS & STAFF NOTES (Append-Only)
 -- ------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.item_audit_logs (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     item_id UUID NOT NULL REFERENCES public.items(id) ON DELETE CASCADE,
     field_name TEXT NOT NULL,
     old_value TEXT,
@@ -150,7 +152,7 @@ BEFORE UPDATE OR DELETE ON public.item_audit_logs
 FOR EACH ROW EXECUTE FUNCTION public.prevent_immutable_mutation();
 
 CREATE TABLE IF NOT EXISTS public.item_notes (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     item_id UUID NOT NULL REFERENCES public.items(id) ON DELETE CASCADE,
     note TEXT NOT NULL,
     author_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE RESTRICT,
@@ -226,10 +228,10 @@ AFTER INSERT OR UPDATE ON public.items
 FOR EACH ROW EXECUTE FUNCTION public.audit_item_changes();
 
 -- ------------------------------------------------------------------------------
--- 10. LOW-STOCK ALERT DISMISSALS TABLE
+-- 10. LOW-STOCK ALERT DISMISSALS
 -- ------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.alert_dismissals (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     item_id UUID NOT NULL REFERENCES public.items(id) ON DELETE CASCADE,
     dismissed_by UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
     stock_at_dismissal NUMERIC(12, 2) NOT NULL,
@@ -538,7 +540,6 @@ CREATE POLICY "Categories viewable by authenticated" ON public.categories
 CREATE POLICY "Categories manageable by managers" ON public.categories
     FOR ALL TO authenticated USING (public.auth_user_role() = 'manager');
 
--- Items: All authenticated users can view; only managers can manage (insert/update/delete)
 CREATE POLICY "Items viewable by authenticated" ON public.items
     FOR SELECT TO authenticated USING (true);
 
