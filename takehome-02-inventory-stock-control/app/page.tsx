@@ -1,5 +1,9 @@
 import LogoutButton from '../components/LogoutButton';
-export default function Home() {
+import { getDashboardStats } from '../lib/supabase/queries';
+
+export default async function Home() {
+  const stats = await getDashboardStats();
+
   return (
     <main
       style={{
@@ -60,26 +64,32 @@ export default function Home() {
         <section
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
             gap: '20px',
           }}
         >
           <DashboardCard
-            title="Total Items"
-            value="6"
-            description="Items in inventory"
+            title="Active Items"
+            value={String(stats.totalItems)}
+            description="Items in active catalog"
+          />
+
+          <DashboardCard
+            title="Low Stock Alerts"
+            value={String(stats.lowStockCount)}
+            description="At or below reorder level"
           />
 
           <DashboardCard
             title="Locations"
-            value="4"
-            description="Active locations"
+            value={String(stats.activeLocations)}
+            description="Active distribution sites"
           />
 
           <DashboardCard
-            title="Stock Movements"
-            value="8"
-            description="Recorded movements"
+            title="Movements Today"
+            value={String(stats.movementsToday)}
+            description="Recorded ledger entries"
           />
         </section>
       </div>
