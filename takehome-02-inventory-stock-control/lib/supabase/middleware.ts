@@ -37,14 +37,14 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
-  if (!user && pathname !== '/login') {
+  if (!user && pathname !== '/auth/login') {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
 
     return NextResponse.redirect(url);
   }
 
-  if (user && pathname === '/login') {
+  if (user && pathname === '/auth/login') {
     const url = request.nextUrl.clone();
     url.pathname = '/';
 
