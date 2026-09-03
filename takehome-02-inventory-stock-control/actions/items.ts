@@ -240,34 +240,32 @@ export async function getItemById(id: string) {
     .eq('is_active', true)
     .order('name');
 
-  // Movements for this item (with profile full_name)
-  const { data: movements } = await supabase
+  // Movements for this item
+  const { data: rawMovements } = await supabase
     .from('stock_movements')
-    .select(`
-      id,
-      movement_type,
-      adjustment_direction,
-      quantity,
-      location_id,
-      destination_location_id,
-      reason,
-      created_at,
-      recorded_by,
-      profiles (
-        full_name,
-        email
-      ),
-      location:locations!stock_movements_location_id_fkey (
-        name,
-        code
-      ),
-      dest_location:locations!stock_movements_destination_location_id_fkey (
-        name,
-        code
-      )
-    `)
+    .select('id, movement_type, adjustment_direction, quantity, location_id, destination_location_id, reason, created_at, recorded_by')
     .eq('item_id', id)
     .order('created_at', { ascending: false });
+
+  // Fetch profiles for users who recorded movements, audits, or notes
+  const userIds = Array.from(new Set([
+    ...(rawMovements?.map((m) => m.recorded_by) || []),
+  ]));
+
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, full_name, email')
+    .in('id', userIds.length > 0 ? userIds : ['00000000-0000-0000-0000-000000000000']);
+
+  const profileMap = new Map(profiles?.map((p) => [p.id, p]));
+  const locMap = new Map(locations?.map((l) => [l.id, l]));
+
+  const movements = (rawMovements || []).map((mov) => ({
+    ...mov,
+    location: locMap.get(mov.location_id) || { name: 'Unknown', code: 'LOC' },
+    dest_location: mov.destination_location_id ? locMap.get(mov.destination_location_id) : null,
+    profiles: profileMap.get(mov.recorded_by) || { full_name: 'Staff Member', email: '' },
+  }));
 
   // Calculate stock per location
   const locationStock: { locationId: string; locationName: string; locationCode: string; onHand: number }[] = [];
@@ -275,7 +273,7 @@ export async function getItemById(id: string) {
 
   locations?.forEach((loc) => {
     let locStock = 0;
-    movements?.forEach((mov) => {
+    movements.forEach((mov) => {
       const qty = Number(mov.quantity);
       if (mov.movement_type === 'receipt' && mov.location_id === loc.id) {
         locStock += qty;
@@ -299,36 +297,42 @@ export async function getItemById(id: string) {
   });
 
   // Audit Logs for this item
-  const { data: auditLogs } = await supabase
+  const { data: rawAuditLogs } = await supabase
     .from('item_audit_logs')
-    .select(`
-      id,
-      field_name,
-      old_value,
-      new_value,
-      created_at,
-      profiles (
-        full_name,
-        email
-      )
-    `)
+    .select('id, field_name, old_value, new_value, created_at, changed_by')
     .eq('item_id', id)
     .order('created_at', { ascending: false });
 
-  // Staff Notes for this item
-  const { data: notes } = await supabase
+  // Notes for this item
+  const { data: rawNotes } = await supabase
     .from('item_notes')
-    .select(`
-      id,
-      note,
-      created_at,
-      profiles (
-        full_name,
-        email
-      )
-    `)
+    .select('id, note, created_at, author_id')
     .eq('item_id', id)
     .order('created_at', { ascending: false });
+
+  const extraUserIds = Array.from(new Set([
+    ...(rawAuditLogs?.map((a) => a.changed_by).filter(Boolean) as string[] || []),
+    ...(rawNotes?.map((n) => n.author_id).filter(Boolean) as string[] || []),
+  ]));
+
+  let extraProfileMap = profileMap;
+  if (extraUserIds.length > 0) {
+    const { data: extraProfiles } = await supabase
+      .from('profiles')
+      .select('id, full_name, email')
+      .in('id', extraUserIds);
+    extraProfiles?.forEach((p) => extraProfileMap.set(p.id, p));
+  }
+
+  const auditLogs = (rawAuditLogs || []).map((log) => ({
+    ...log,
+    profiles: log.changed_by ? extraProfileMap.get(log.changed_by) : null,
+  }));
+
+  const notes = (rawNotes || []).map((note) => ({
+    ...note,
+    profiles: note.author_id ? extraProfileMap.get(note.author_id) : null,
+  }));
 
   return {
     item: {
