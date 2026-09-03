@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getLocationsWithStaff, createLocationAction, updateLocationStaffAssignmentsAction, toggleLocationActiveAction } from '../../actions/locations';
+import { getLocationsWithStaff, createLocationAction, createStaffMemberAction, updateLocationStaffAssignmentsAction, toggleLocationActiveAction } from '../../actions/locations';
 import LogoutButton from '../../components/LogoutButton';
 
 export const dynamic = 'force-dynamic';
@@ -12,6 +12,11 @@ export default async function LocationsPage() {
   async function handleCreateLocation(formData: FormData) {
     'use server';
     await createLocationAction(formData);
+  }
+
+  async function handleCreateStaff(formData: FormData) {
+    'use server';
+    await createStaffMemberAction(formData);
   }
 
   async function handleUpdateStaff(formData: FormData) {
@@ -69,57 +74,125 @@ export default async function LocationsPage() {
         </nav>
 
         {isManager && (
-          <div
-            style={{
-              backgroundColor: 'white',
-              padding: '24px',
-              borderRadius: '10px',
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
-              marginBottom: '24px',
-            }}
-          >
-            <h2 style={{ margin: '0 0 14px', fontSize: '16px', fontWeight: 700, color: '#0f172a' }}>+ Create New Location</h2>
-            <form action={handleCreateLocation} style={{ display: 'flex', gap: '16px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
-              <div style={{ flex: 2, minWidth: '220px' }}>
-                <label style={labelStyle}>Location Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  required
-                  placeholder="e.g. East Distribution Hub, Retail Floor C"
-                  style={inputStyle}
-                />
-              </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(480px, 1fr))', gap: '20px', marginBottom: '24px' }}>
+            
+            <div
+              style={{
+                backgroundColor: 'white',
+                padding: '24px',
+                borderRadius: '10px',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
+              }}
+            >
+              <h2 style={{ margin: '0 0 14px', fontSize: '16px', fontWeight: 700, color: '#0f172a' }}>+ Create New Location</h2>
+              <form action={handleCreateLocation} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div>
+                  <label style={labelStyle}>Location Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    required
+                    placeholder="e.g. East Distribution Hub, Retail Floor C"
+                    style={inputStyle}
+                  />
+                </div>
 
-              <div style={{ flex: 1, minWidth: '150px' }}>
-                <label style={labelStyle}>Unique Code</label>
-                <input
-                  type="text"
-                  name="code"
-                  required
-                  placeholder="e.g. WH-EAST, RET-03"
-                  style={inputStyle}
-                />
-              </div>
+                <div>
+                  <label style={labelStyle}>Unique Code</label>
+                  <input
+                    type="text"
+                    name="code"
+                    required
+                    placeholder="e.g. WH-EAST, RET-03"
+                    style={inputStyle}
+                  />
+                </div>
 
-              <button
-                type="submit"
-                style={{
-                  padding: '9px 20px',
-                  backgroundColor: '#2563eb',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontWeight: 600,
-                  fontSize: '13px',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                Add Location
-              </button>
-            </form>
+                <button
+                  type="submit"
+                  style={{
+                    padding: '9px 20px',
+                    backgroundColor: '#2563eb',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontWeight: 600,
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    marginTop: '4px',
+                  }}
+                >
+                  Add Location
+                </button>
+              </form>
+            </div>
+
+            <div
+              style={{
+                backgroundColor: 'white',
+                padding: '24px',
+                borderRadius: '10px',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
+              }}
+            >
+              <h2 style={{ margin: '0 0 14px', fontSize: '16px', fontWeight: 700, color: '#0f172a' }}>+ Register New Staff Account</h2>
+              <form action={handleCreateStaff} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div>
+                  <label style={labelStyle}>Staff Member Full Name</label>
+                  <input
+                    type="text"
+                    name="full_name"
+                    required
+                    placeholder="e.g. Marcus Vance"
+                    style={inputStyle}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <div>
+                    <label style={labelStyle}>Work Email</label>
+                    <input
+                      type="email"
+                      name="email"
+                      required
+                      placeholder="staff.marcus@demo.com"
+                      style={inputStyle}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={labelStyle}>Temporary Password</label>
+                    <input
+                      type="password"
+                      name="password"
+                      required
+                      placeholder="Password123!"
+                      style={inputStyle}
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  style={{
+                    padding: '9px 20px',
+                    backgroundColor: '#059669',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontWeight: 600,
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    marginTop: '4px',
+                  }}
+                >
+                  Create Staff Account
+                </button>
+              </form>
+            </div>
+
           </div>
         )}
 

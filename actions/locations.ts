@@ -138,6 +138,68 @@ export async function createLocationAction(formData: FormData) {
   return { success: true };
 }
 
+export async function createStaffMemberAction(formData: FormData) {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'You must be signed in.' };
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (profile?.role !== 'manager') {
+    return { error: 'Permission Denied: Only inventory managers can register new staff members.' };
+  }
+
+  const fullName = (formData.get('full_name') as string)?.trim();
+  const email = (formData.get('email') as string)?.trim().toLowerCase();
+  const password = (formData.get('password') as string)?.trim();
+
+  if (!fullName || !email || !password) {
+    return { error: 'Full Name, Email, and Password are required.' };
+  }
+
+  if (password.length < 6) {
+    return { error: 'Password must be at least 6 characters.' };
+  }
+
+  const { data: authData, error: authError } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        full_name: fullName,
+        role: 'staff',
+      },
+    },
+  });
+
+  if (authError || !authData.user) {
+    return { error: authError?.message || 'Failed to create staff user.' };
+  }
+
+  const { error: profileError } = await supabase
+    .from('profiles')
+    .upsert({
+      id: authData.user.id,
+      email,
+      full_name: fullName,
+      role: 'staff',
+    });
+
+  if (profileError) {
+    return { error: profileError.message };
+  }
+
+  revalidatePath('/locations');
+  revalidatePath('/movements/record');
+
+  return { success: true };
+}
+
 export async function updateLocationStaffAssignmentsAction(locationId: string, staffUserIds: string[]) {
   const supabase = await createClient();
 
