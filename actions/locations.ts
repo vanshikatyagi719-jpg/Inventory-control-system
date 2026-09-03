@@ -143,29 +143,15 @@ export async function createStaffMemberAction(formData: FormData): Promise<void>
     return;
   }
 
-  const { data: authData, error: authError } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        full_name: fullName,
-        role: 'staff',
-      },
-    },
+  const { error: rpcError } = await supabase.rpc('create_staff_user', {
+    p_email: email,
+    p_password: password,
+    p_full_name: fullName,
   });
 
-  if (authError || !authData.user) {
-    return;
+  if (rpcError) {
+    console.error('create_staff_user RPC error:', rpcError.message);
   }
-
-  await supabase
-    .from('profiles')
-    .upsert({
-      id: authData.user.id,
-      email,
-      full_name: fullName,
-      role: 'staff',
-    });
 
   revalidatePath('/locations');
   revalidatePath('/movements/record');
