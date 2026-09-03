@@ -9,28 +9,6 @@ export default async function LocationsPage() {
 
   const isManager = userRole === 'manager';
 
-  async function handleCreateLocation(formData: FormData) {
-    'use server';
-    await createLocationAction(formData);
-  }
-
-  async function handleCreateStaff(formData: FormData) {
-    'use server';
-    await createStaffMemberAction(formData);
-  }
-
-  async function handleUpdateStaff(formData: FormData) {
-    'use server';
-    const locationId = formData.get('location_id') as string;
-    const selectedStaffIds = formData.getAll('staff_ids') as string[];
-    await updateLocationStaffAssignmentsAction(locationId, selectedStaffIds);
-  }
-
-  async function handleToggleStatus(locationId: string, currentStatus: boolean) {
-    'use server';
-    await toggleLocationActiveAction(locationId, !currentStatus);
-  }
-
   return (
     <main
       style={{
@@ -86,7 +64,7 @@ export default async function LocationsPage() {
               }}
             >
               <h2 style={{ margin: '0 0 14px', fontSize: '16px', fontWeight: 700, color: '#0f172a' }}>+ Create New Location</h2>
-              <form action={handleCreateLocation} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <form action={createLocationAction} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div>
                   <label style={labelStyle}>Location Name</label>
                   <input
@@ -138,7 +116,7 @@ export default async function LocationsPage() {
               }}
             >
               <h2 style={{ margin: '0 0 14px', fontSize: '16px', fontWeight: 700, color: '#0f172a' }}>+ Register New Staff Account</h2>
-              <form action={handleCreateStaff} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <form action={createStaffMemberAction} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div>
                   <label style={labelStyle}>Staff Member Full Name</label>
                   <input
@@ -267,7 +245,9 @@ export default async function LocationsPage() {
                   </div>
 
                   {isManager && (
-                    <form action={handleToggleStatus.bind(null, loc.id, loc.is_active)}>
+                    <form action={toggleLocationActiveAction}>
+                      <input type="hidden" name="location_id" value={loc.id} />
+                      <input type="hidden" name="is_active" value={loc.is_active ? 'false' : 'true'} />
                       <button
                         type="submit"
                         style={{
@@ -290,7 +270,7 @@ export default async function LocationsPage() {
 
                 {isManager && staffUsers.length > 0 && (
                   <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
-                    <form action={handleUpdateStaff} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+                    <form action={updateLocationStaffAssignmentsAction} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
                       <input type="hidden" name="location_id" value={loc.id} />
                       
                       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
