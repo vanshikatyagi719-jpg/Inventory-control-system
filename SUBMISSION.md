@@ -4,8 +4,8 @@ Fill this in and commit it. This is the first file we open.
 
 ## Links
 
-- **GitHub repository:** <public repo URL>
-- **Live application:** <deployed URL>
+- **GitHub repository:** https://github.com/vanshikatyagi719-jpg/Inventory-control-system
+- **Live application:** https://inventory-control-system-delta.vercel.app
 
 ## Notes for the reviewer
 
