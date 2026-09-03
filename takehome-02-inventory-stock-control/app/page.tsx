@@ -1,6 +1,8 @@
 import LogoutButton from '../components/LogoutButton';
 import { getDashboardStats } from '../lib/supabase/queries';
 
+
+export const dynamic = 'force-dynamic';
 export default async function Home() {
   const stats = await getDashboardStats();
 
