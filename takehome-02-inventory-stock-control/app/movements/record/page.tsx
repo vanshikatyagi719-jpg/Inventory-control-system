@@ -82,40 +82,39 @@ export default function RecordMovementPage() {
     <main
       style={{
         minHeight: '100vh',
-        backgroundColor: '#f5f7fa',
+        backgroundColor: '#f8fafc',
         padding: '40px',
-        fontFamily: 'Arial, sans-serif',
+        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
       }}
     >
       <div style={{ maxWidth: '750px', margin: '0 auto' }}>
         
         <div style={{ marginBottom: '24px' }}>
-          <Link href="/movements" style={{ color: '#2563eb', textDecoration: 'none', fontSize: '14px', fontWeight: 'bold' }}>
-            ← Back to Movement Ledger
+          <Link href="/movements" style={{ color: '#2563eb', textDecoration: 'none', fontSize: '13px', fontWeight: 600 }}>
+            &larr; Back to Movement Ledger
           </Link>
-          <h1 style={{ margin: '8px 0 0', fontSize: '26px', color: '#111827' }}>Record Stock Movement</h1>
-          <p style={{ margin: '4px 0 0', color: '#6b7280', fontSize: '14px' }}>
+          <h1 style={{ margin: '8px 0 0', fontSize: '24px', fontWeight: 800, color: '#0f172a' }}>Record Stock Movement</h1>
+          <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '14px' }}>
             Every entry is permanently written to the append-only stock ledger.
           </p>
         </div>
 
-        {/* Movement Mode Selector Tabs */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '20px' }}>
           <button
             type="button"
             onClick={() => { setMovementType('receipt'); setError(null); }}
             style={{
               padding: '12px',
-              border: movementType === 'receipt' ? '2px solid #059669' : '1px solid #d1d5db',
+              border: movementType === 'receipt' ? '2px solid #059669' : '1px solid #cbd5e1',
               backgroundColor: movementType === 'receipt' ? '#ecfdf5' : 'white',
-              color: movementType === 'receipt' ? '#065f46' : '#374151',
+              color: movementType === 'receipt' ? '#065f46' : '#334155',
               borderRadius: '6px',
-              fontWeight: 'bold',
+              fontWeight: 600,
               fontSize: '13px',
               cursor: 'pointer',
             }}
           >
-            📥 Receipt Inflow (+)
+            Receipt Inflow (+)
           </button>
 
           <button
@@ -123,16 +122,16 @@ export default function RecordMovementPage() {
             onClick={() => { setMovementType('issue'); setError(null); }}
             style={{
               padding: '12px',
-              border: movementType === 'issue' ? '2px solid #dc2626' : '1px solid #d1d5db',
+              border: movementType === 'issue' ? '2px solid #dc2626' : '1px solid #cbd5e1',
               backgroundColor: movementType === 'issue' ? '#fef2f2' : 'white',
-              color: movementType === 'issue' ? '#991b1b' : '#374151',
+              color: movementType === 'issue' ? '#991b1b' : '#334155',
               borderRadius: '6px',
-              fontWeight: 'bold',
+              fontWeight: 600,
               fontSize: '13px',
               cursor: 'pointer',
             }}
           >
-            📤 Issue Outflow (-)
+            Issue Outflow (-)
           </button>
 
           <button
@@ -140,16 +139,16 @@ export default function RecordMovementPage() {
             onClick={() => { setMovementType('transfer'); setError(null); }}
             style={{
               padding: '12px',
-              border: movementType === 'transfer' ? '2px solid #4338ca' : '1px solid #d1d5db',
+              border: movementType === 'transfer' ? '2px solid #4338ca' : '1px solid #cbd5e1',
               backgroundColor: movementType === 'transfer' ? '#e0e7ff' : 'white',
-              color: movementType === 'transfer' ? '#3730a3' : '#374151',
+              color: movementType === 'transfer' ? '#3730a3' : '#334155',
               borderRadius: '6px',
-              fontWeight: 'bold',
+              fontWeight: 600,
               fontSize: '13px',
               cursor: 'pointer',
             }}
           >
-            ⇄ Transfer (Loc to Loc)
+            Transfer (Loc to Loc)
           </button>
 
           <button
@@ -159,28 +158,27 @@ export default function RecordMovementPage() {
             title={!isManager ? 'Managers only' : ''}
             style={{
               padding: '12px',
-              border: movementType === 'adjustment' ? '2px solid #b45309' : '1px solid #d1d5db',
+              border: movementType === 'adjustment' ? '2px solid #d97706' : '1px solid #cbd5e1',
               backgroundColor: movementType === 'adjustment' ? '#fef3c7' : 'white',
-              color: movementType === 'adjustment' ? '#92400e' : '#374151',
+              color: movementType === 'adjustment' ? '#92400e' : '#334155',
               borderRadius: '6px',
-              fontWeight: 'bold',
+              fontWeight: 600,
               fontSize: '13px',
               cursor: isManager ? 'pointer' : 'not-allowed',
               opacity: isManager ? 1 : 0.5,
             }}
           >
-            ⚖️ Adjustment {!isManager && '(Mgr Only)'}
+            Adjustment {!isManager && '(Mgr Only)'}
           </button>
         </div>
 
-        {/* Form Card */}
         <div
           style={{
             backgroundColor: 'white',
-            padding: '30px',
-            borderRadius: '8px',
-            border: '1px solid #e5e7eb',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+            padding: '32px',
+            borderRadius: '10px',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
           }}
         >
           {error && (
@@ -192,17 +190,16 @@ export default function RecordMovementPage() {
                 color: '#991b1b',
                 borderRadius: '6px',
                 fontSize: '13px',
-                fontWeight: 'bold',
+                fontWeight: 600,
                 marginBottom: '20px',
               }}
             >
-              ⚠️ {error}
+              {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             
-            {/* Item Selector */}
             <div>
               <label style={labelStyle}>
                 Select Item <span style={{ color: '#dc2626' }}>*</span>
@@ -222,7 +219,6 @@ export default function RecordMovementPage() {
               </select>
             </div>
 
-            {/* Source Location */}
             <div>
               <label style={labelStyle}>
                 {movementType === 'transfer' ? 'Source Location (Moving From)' : 'Location'} <span style={{ color: '#dc2626' }}>*</span>
@@ -244,11 +240,10 @@ export default function RecordMovementPage() {
                 )}
               </select>
               {!isManager && (
-                <span style={hintStyle}>Showing only locations assigned to your staff profile (Goal 5).</span>
+                <span style={hintStyle}>Showing only locations assigned to your staff profile.</span>
               )}
             </div>
 
-            {/* Destination Location (Transfers Only) */}
             {movementType === 'transfer' && (
               <div>
                 <label style={labelStyle}>
@@ -273,7 +268,6 @@ export default function RecordMovementPage() {
               </div>
             )}
 
-            {/* Adjustment Fields (Manager Only) */}
             {movementType === 'adjustment' && (
               <div style={{ padding: '16px', backgroundColor: '#fef3c7', borderRadius: '6px', border: '1px solid #fde68a', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <div>
@@ -281,7 +275,7 @@ export default function RecordMovementPage() {
                     Adjustment Type <span style={{ color: '#dc2626' }}>*</span>
                   </label>
                   <div style={{ display: 'flex', gap: '16px', marginTop: '6px' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 'bold', color: '#92400e', cursor: 'pointer' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: '#92400e', cursor: 'pointer' }}>
                       <input
                         type="radio"
                         name="adj_dir"
@@ -292,7 +286,7 @@ export default function RecordMovementPage() {
                       Decrease Stock (Damage, Shrinkage, Miscount)
                     </label>
 
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 'bold', color: '#065f46', cursor: 'pointer' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: '#065f46', cursor: 'pointer' }}>
                       <input
                         type="radio"
                         name="adj_dir"
@@ -307,7 +301,7 @@ export default function RecordMovementPage() {
 
                 <div>
                   <label style={labelStyle}>
-                    Reason for Adjustment <span style={{ color: '#dc2626' }}>* (Mandatory - Goal 4)</span>
+                    Reason for Adjustment <span style={{ color: '#dc2626' }}>* (Mandatory)</span>
                   </label>
                   <input
                     type="text"
@@ -322,7 +316,6 @@ export default function RecordMovementPage() {
               </div>
             )}
 
-            {/* Quantity */}
             <div>
               <label style={labelStyle}>
                 Quantity to Move ({selectedItem?.unit_of_measure || 'units'}) <span style={{ color: '#dc2626' }}>*</span>
@@ -342,18 +335,17 @@ export default function RecordMovementPage() {
               </span>
             </div>
 
-            {/* Submit Bar */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
               <Link
                 href="/movements"
                 style={{
                   padding: '10px 18px',
-                  backgroundColor: '#f3f4f6',
-                  color: '#374151',
+                  backgroundColor: '#f1f5f9',
+                  color: '#334155',
                   borderRadius: '6px',
                   textDecoration: 'none',
-                  fontSize: '14px',
-                  fontWeight: 'bold',
+                  fontSize: '13px',
+                  fontWeight: 600,
                 }}
               >
                 Cancel
@@ -364,12 +356,12 @@ export default function RecordMovementPage() {
                 disabled={isPending || !selectedItemId}
                 style={{
                   padding: '10px 24px',
-                  backgroundColor: movementType === 'receipt' ? '#059669' : movementType === 'issue' ? '#dc2626' : movementType === 'transfer' ? '#4338ca' : '#b45309',
+                  backgroundColor: movementType === 'receipt' ? '#059669' : movementType === 'issue' ? '#dc2626' : movementType === 'transfer' ? '#4338ca' : '#d97706',
                   color: 'white',
                   border: 'none',
                   borderRadius: '6px',
-                  fontSize: '14px',
-                  fontWeight: 'bold',
+                  fontSize: '13px',
+                  fontWeight: 600,
                   cursor: isPending || !selectedItemId ? 'not-allowed' : 'pointer',
                   opacity: isPending || !selectedItemId ? 0.5 : 1,
                 }}
@@ -388,17 +380,19 @@ export default function RecordMovementPage() {
 
 const labelStyle: React.CSSProperties = {
   display: 'block',
-  fontSize: '13px',
-  fontWeight: 'bold',
-  color: '#374151',
+  fontSize: '12px',
+  fontWeight: 700,
+  color: '#334155',
   marginBottom: '6px',
+  textTransform: 'uppercase',
+  letterSpacing: '0.05em',
 };
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '10px 14px',
   borderRadius: '6px',
-  border: '1px solid #d1d5db',
+  border: '1px solid #cbd5e1',
   fontSize: '14px',
   backgroundColor: 'white',
   boxSizing: 'border-box',
@@ -407,6 +401,6 @@ const inputStyle: React.CSSProperties = {
 const hintStyle: React.CSSProperties = {
   display: 'block',
   fontSize: '11px',
-  color: '#6b7280',
+  color: '#64748b',
   marginTop: '4px',
 };

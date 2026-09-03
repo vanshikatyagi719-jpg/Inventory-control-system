@@ -38,7 +38,6 @@ export interface GetItemsResult {
   totalPages: number;
 }
 
-// 1. GET ITEMS (Server-side Search, Filtering, Sorting, Pagination)
 export async function getItems(filters: ItemQueryFilters = {}): Promise<GetItemsResult> {
   const supabase = await createClient();
 
@@ -54,7 +53,6 @@ export async function getItems(filters: ItemQueryFilters = {}): Promise<GetItems
     pageSize = 10,
   } = filters;
 
-  // 1. Query items with category info
   let query = supabase
     .from('items')
     .select(`
@@ -72,17 +70,14 @@ export async function getItems(filters: ItemQueryFilters = {}): Promise<GetItems
       )
     `);
 
-  // Search by name or SKU
   if (search.trim()) {
     query = query.or(`name.ilike.%${search.trim()}%,sku.ilike.%${search.trim()}%`);
   }
 
-  // Filter by Category
   if (categoryId) {
     query = query.eq('category_id', categoryId);
   }
 
-  // Filter by Archived Status
   if (status === 'active') {
     query = query.eq('is_archived', false);
   } else if (status === 'archived') {
@@ -96,16 +91,14 @@ export async function getItems(filters: ItemQueryFilters = {}): Promise<GetItems
     return { items: [], totalMatches: 0, page, pageSize, totalPages: 0 };
   }
 
-  // 2. Fetch stock movements to compute dynamic balances per location and globally
   const itemIds = rawItems.map((i) => i.id);
   const { data: movements } = await supabase
     .from('stock_movements')
     .select('item_id, movement_type, quantity, location_id, destination_location_id, adjustment_direction')
     .in('item_id', itemIds);
 
-  // Map balances
   const globalStockMap = new Map<string, number>();
-  const locationStockMap = new Map<string, number>(); // key: `${item_id}_${location_id}`
+  const locationStockMap = new Map<string, number>();
 
   movements?.forEach((mov) => {
     const qty = Number(mov.quantity);
@@ -120,15 +113,12 @@ export async function getItems(filters: ItemQueryFilters = {}): Promise<GetItems
       const locKey = `${mov.item_id}_${mov.location_id}`;
       locationStockMap.set(locKey, (locationStockMap.get(locKey) || 0) - qty);
     } else if (mov.movement_type === 'transfer') {
-      // Outflow from source
       const srcKey = `${mov.item_id}_${mov.location_id}`;
       locationStockMap.set(srcKey, (locationStockMap.get(srcKey) || 0) - qty);
-      // Inflow to destination
       if (mov.destination_location_id) {
         const destKey = `${mov.item_id}_${mov.destination_location_id}`;
         locationStockMap.set(destKey, (locationStockMap.get(destKey) || 0) + qty);
       }
-      // Global stock remains unchanged on transfers
     } else if (mov.movement_type === 'adjustment') {
       const delta = mov.adjustment_direction === 'decrease' ? -qty : qty;
       globalStockMap.set(mov.item_id, currentGlobal + delta);
@@ -137,7 +127,6 @@ export async function getItems(filters: ItemQueryFilters = {}): Promise<GetItems
     }
   });
 
-  // 3. Assemble and calculate low stock
   let assembledItems: ItemListItem[] = rawItems.map((item: any) => {
     const total_on_hand = globalStockMap.get(item.id) || 0;
     const locKey = `${item.id}_${locationId}`;
@@ -160,17 +149,14 @@ export async function getItems(filters: ItemQueryFilters = {}): Promise<GetItems
     };
   });
 
-  // Filter by Low Stock Only if requested
   if (lowStockOnly) {
     assembledItems = assembledItems.filter((i) => i.is_low_stock);
   }
 
-  // Filter by Location if requested (keep items that have stock at that location or match query)
   if (locationId) {
     assembledItems = assembledItems.filter((i) => (i.location_on_hand ?? 0) > 0 || !lowStockOnly);
   }
 
-  // 4. Server-Side Sorting
   assembledItems.sort((a, b) => {
     let comparison = 0;
     if (sortBy === 'name') {
@@ -188,7 +174,6 @@ export async function getItems(filters: ItemQueryFilters = {}): Promise<GetItems
     return sortDir === 'desc' ? -comparison : comparison;
   });
 
-  // 5. Server-Side Pagination
   const totalMatches = assembledItems.length;
   const totalPages = Math.ceil(totalMatches / pageSize) || 1;
   const startIndex = (page - 1) * pageSize;
@@ -203,11 +188,9 @@ export async function getItems(filters: ItemQueryFilters = {}): Promise<GetItems
   };
 }
 
-// 2. GET ITEM BY ID (Details, Location Stock, Movements, Audit Log, Notes)
 export async function getItemById(id: string) {
   const supabase = await createClient();
 
-  // Item with Category
   const { data: item, error: itemError } = await supabase
     .from('items')
     .select(`
@@ -233,21 +216,18 @@ export async function getItemById(id: string) {
     return null;
   }
 
-  // Locations list
   const { data: locations } = await supabase
     .from('locations')
     .select('id, name, code')
     .eq('is_active', true)
     .order('name');
 
-  // Movements for this item
   const { data: rawMovements } = await supabase
     .from('stock_movements')
     .select('id, movement_type, adjustment_direction, quantity, location_id, destination_location_id, reason, created_at, recorded_by')
     .eq('item_id', id)
     .order('created_at', { ascending: false });
 
-  // Fetch profiles for users who recorded movements, audits, or notes
   const userIds = Array.from(new Set([
     ...(rawMovements?.map((m) => m.recorded_by) || []),
   ]));
@@ -267,7 +247,6 @@ export async function getItemById(id: string) {
     profiles: profileMap.get(mov.recorded_by) || { full_name: 'Staff Member', email: '' },
   }));
 
-  // Calculate stock per location
   const locationStock: { locationId: string; locationName: string; locationCode: string; onHand: number }[] = [];
   let totalOnHand = 0;
 
@@ -296,14 +275,12 @@ export async function getItemById(id: string) {
     });
   });
 
-  // Audit Logs for this item
   const { data: rawAuditLogs } = await supabase
     .from('item_audit_logs')
     .select('id, field_name, old_value, new_value, created_at, changed_by')
     .eq('item_id', id)
     .order('created_at', { ascending: false });
 
-  // Notes for this item
   const { data: rawNotes } = await supabase
     .from('item_notes')
     .select('id, note, created_at, author_id')
@@ -348,14 +325,12 @@ export async function getItemById(id: string) {
   };
 }
 
-// 3. CREATE ITEM (Manager Only)
 export async function createItemAction(formData: FormData) {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'You must be signed in.' };
 
-  // Verify Manager role
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')
@@ -403,7 +378,6 @@ export async function createItemAction(formData: FormData) {
   return { success: true, id: newItem.id };
 }
 
-// 4. UPDATE ITEM (Manager Only)
 export async function updateItemAction(id: string, formData: FormData) {
   const supabase = await createClient();
 
@@ -453,7 +427,6 @@ export async function updateItemAction(id: string, formData: FormData) {
   return { success: true };
 }
 
-// 5. ARCHIVE / RESTORE ITEM (Manager Only)
 export async function toggleArchiveItemAction(id: string, isArchived: boolean) {
   const supabase = await createClient();
 
@@ -485,7 +458,6 @@ export async function toggleArchiveItemAction(id: string, isArchived: boolean) {
   return { success: true };
 }
 
-// 6. ADD STAFF NOTE (Staff & Managers)
 export async function addItemNoteAction(itemId: string, note: string) {
   const supabase = await createClient();
 
@@ -512,7 +484,6 @@ export async function addItemNoteAction(itemId: string, note: string) {
   return { success: true };
 }
 
-// 7. GET CATEGORIES
 export async function getCategories() {
   const supabase = await createClient();
   const { data } = await supabase
@@ -523,7 +494,6 @@ export async function getCategories() {
   return data || [];
 }
 
-// 8. GET LOCATIONS
 export async function getLocations() {
   const supabase = await createClient();
   const { data } = await supabase
@@ -535,7 +505,6 @@ export async function getLocations() {
   return data || [];
 }
 
-// 9. GET USER ROLE
 export async function getUserRole(): Promise<'manager' | 'staff' | null> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

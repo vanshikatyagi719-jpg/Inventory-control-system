@@ -11,17 +11,14 @@ export interface MovementFilterParams {
   pageSize?: number;
 }
 
-// 1. RECORD STOCK MOVEMENT (Receipt, Issue, Transfer, Adjustment)
 export async function recordMovementAction(formData: FormData) {
   const supabase = await createClient();
 
-  // 1. Verify User Authentication
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return { error: 'You must be signed in to record stock movements.' };
   }
 
-  // 2. Fetch User Profile and Location Assignments (Goal 1 & 5)
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')
@@ -38,19 +35,16 @@ export async function recordMovementAction(formData: FormData) {
   const adjustmentDirection = (formData.get('adjustment_direction') as 'increase' | 'decrease') || null;
   const reason = (formData.get('reason') as string)?.trim() || null;
 
-  // Basic Validation
   if (!itemId) return { error: 'Please select an item.' };
   if (!locationId) return { error: 'Please select a location.' };
   if (!quantity || quantity <= 0 || isNaN(quantity)) {
     return { error: 'Quantity must be a positive number greater than zero.' };
   }
 
-  // Role Restrictions: Staff cannot record adjustments (Goal 1)
   if (movementType === 'adjustment' && userRole !== 'manager') {
     return { error: 'Only inventory managers can record stock adjustments.' };
   }
 
-  // Location Assignment Check for Staff (Goal 5)
   if (userRole === 'staff') {
     const { data: assignment } = await supabase
       .from('location_assignments')
@@ -64,7 +58,6 @@ export async function recordMovementAction(formData: FormData) {
     }
   }
 
-  // Transfer Invariant: Destination must be different from Source (Goal 3 & 4)
   if (movementType === 'transfer') {
     if (!destinationLocationId) {
       return { error: 'Destination location is required for transfers.' };
@@ -74,7 +67,6 @@ export async function recordMovementAction(formData: FormData) {
     }
   }
 
-  // Adjustment Invariant: Reason is strictly required (Goal 4)
   if (movementType === 'adjustment') {
     if (!adjustmentDirection) {
       return { error: 'Please select whether the adjustment is an increase or decrease.' };
@@ -84,8 +76,6 @@ export async function recordMovementAction(formData: FormData) {
     }
   }
 
-  // 3. Execute Atomic Stored Procedure in PostgreSQL (PL/pgSQL with Row Lock)
-  // This prevents negative inventory and handles atomic transaction concurrency (Goal 4)
   const { data: newMovementId, error: rpcError } = await supabase.rpc('record_stock_movement', {
     p_item_id: itemId,
     p_movement_type: movementType,
@@ -102,7 +92,6 @@ export async function recordMovementAction(formData: FormData) {
     return { error: rpcError.message };
   }
 
-  // Invalidate Next.js cache to reflect updated on-hand balances
   revalidatePath('/movements');
   revalidatePath(`/items/${itemId}`);
   revalidatePath('/items');
@@ -111,7 +100,6 @@ export async function recordMovementAction(formData: FormData) {
   return { success: true, movementId: newMovementId, itemId };
 }
 
-// 2. GET GLOBAL MOVEMENTS LEDGER (Goal 3 & 4)
 export async function getGlobalMovements(params: MovementFilterParams = {}) {
   const supabase = await createClient();
   const { itemId, locationId, movementType, page = 1, pageSize = 20 } = params;
@@ -149,7 +137,6 @@ export async function getGlobalMovements(params: MovementFilterParams = {}) {
     return { movements: [], totalMatches: 0, totalPages: 1 };
   }
 
-  // Enrich with items, locations, and profiles metadata
   const itemIds = Array.from(new Set(rawMovements.map((m) => m.item_id)));
   const locIds = Array.from(
     new Set(
@@ -185,7 +172,6 @@ export async function getGlobalMovements(params: MovementFilterParams = {}) {
   };
 }
 
-// 3. GET ACCESSIBLE LOCATIONS FOR CURRENT USER (Staff vs Manager - Goal 5)
 export async function getAccessibleLocations() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -200,7 +186,6 @@ export async function getAccessibleLocations() {
   const isManager = profile?.role === 'manager';
 
   if (isManager) {
-    // Managers can act at every location
     const { data: allLocations } = await supabase
       .from('locations')
       .select('id, name, code')
@@ -209,7 +194,6 @@ export async function getAccessibleLocations() {
 
     return { locations: allLocations || [], isManager: true };
   } else {
-    // Staff can only act at assigned locations
     const { data: assignments } = await supabase
       .from('location_assignments')
       .select(`

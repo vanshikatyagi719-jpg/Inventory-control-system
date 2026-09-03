@@ -24,19 +24,19 @@ export default async function NewItemPage() {
     <main
       style={{
         minHeight: '100vh',
-        backgroundColor: '#f5f7fa',
+        backgroundColor: '#f8fafc',
         padding: '40px',
-        fontFamily: 'Arial, sans-serif',
+        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
       }}
     >
       <div style={{ maxWidth: '700px', margin: '0 auto' }}>
         
         <div style={{ marginBottom: '24px' }}>
-          <Link href="/items" style={{ color: '#2563eb', textDecoration: 'none', fontSize: '14px', fontWeight: 'bold' }}>
-            ← Back to Items Catalog
+          <Link href="/items" style={{ color: '#2563eb', textDecoration: 'none', fontSize: '13px', fontWeight: 600 }}>
+            &larr; Back to Items Catalog
           </Link>
-          <h1 style={{ margin: '8px 0 0', fontSize: '26px', color: '#111827' }}>Create New Inventory Item</h1>
-          <p style={{ margin: '4px 0 0', color: '#6b7280', fontSize: '14px' }}>
+          <h1 style={{ margin: '8px 0 0', fontSize: '24px', fontWeight: 800, color: '#0f172a' }}>Create New Inventory Item</h1>
+          <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '14px' }}>
             Managers can add new items to the central catalog.
           </p>
         </div>
@@ -44,15 +44,14 @@ export default async function NewItemPage() {
         <div
           style={{
             backgroundColor: 'white',
-            padding: '30px',
-            borderRadius: '8px',
-            border: '1px solid #e5e7eb',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+            padding: '32px',
+            borderRadius: '10px',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
           }}
         >
           <form action={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             
-            {/* SKU */}
             <div>
               <label style={labelStyle}>
                 SKU (Stock Keeping Unit) <span style={{ color: '#dc2626' }}>*</span>
@@ -67,7 +66,6 @@ export default async function NewItemPage() {
               <span style={hintStyle}>Must be a unique alphanumeric identifier.</span>
             </div>
 
-            {/* Name */}
             <div>
               <label style={labelStyle}>
                 Item Name <span style={{ color: '#dc2626' }}>*</span>
@@ -81,7 +79,6 @@ export default async function NewItemPage() {
               />
             </div>
 
-            {/* Description */}
             <div>
               <label style={labelStyle}>Description</label>
               <textarea
@@ -92,7 +89,6 @@ export default async function NewItemPage() {
               />
             </div>
 
-            {/* Category */}
             <div>
               <label style={labelStyle}>
                 Category <span style={{ color: '#dc2626' }}>*</span>
@@ -105,10 +101,8 @@ export default async function NewItemPage() {
                   </option>
                 ))}
               </select>
-              <span style={hintStyle}>Categories are maintained centrally by managers.</span>
             </div>
 
-            {/* Unit of Measure & Reorder Level */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={labelStyle}>Unit of Measure</label>
@@ -131,22 +125,20 @@ export default async function NewItemPage() {
                   defaultValue="0"
                   style={inputStyle}
                 />
-                <span style={hintStyle}>Alerts trigger when total stock $\le$ this number.</span>
               </div>
             </div>
 
-            {/* Submit Button */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
               <Link
                 href="/items"
                 style={{
                   padding: '10px 18px',
-                  backgroundColor: '#f3f4f6',
-                  color: '#374151',
+                  backgroundColor: '#f1f5f9',
+                  color: '#334155',
                   borderRadius: '6px',
                   textDecoration: 'none',
-                  fontSize: '14px',
-                  fontWeight: 'bold',
+                  fontSize: '13px',
+                  fontWeight: 600,
                 }}
               >
                 Cancel
@@ -160,8 +152,8 @@ export default async function NewItemPage() {
                   color: 'white',
                   border: 'none',
                   borderRadius: '6px',
-                  fontSize: '14px',
-                  fontWeight: 'bold',
+                  fontSize: '13px',
+                  fontWeight: 600,
                   cursor: 'pointer',
                 }}
               >
@@ -179,17 +171,19 @@ export default async function NewItemPage() {
 
 const labelStyle: React.CSSProperties = {
   display: 'block',
-  fontSize: '13px',
-  fontWeight: 'bold',
-  color: '#374151',
+  fontSize: '12px',
+  fontWeight: 700,
+  color: '#334155',
   marginBottom: '6px',
+  textTransform: 'uppercase',
+  letterSpacing: '0.05em',
 };
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '10px 14px',
   borderRadius: '6px',
-  border: '1px solid #d1d5db',
+  border: '1px solid #cbd5e1',
   fontSize: '14px',
   backgroundColor: 'white',
   boxSizing: 'border-box',
@@ -198,6 +192,6 @@ const inputStyle: React.CSSProperties = {
 const hintStyle: React.CSSProperties = {
   display: 'block',
   fontSize: '11px',
-  color: '#6b7280',
+  color: '#64748b',
   marginTop: '4px',
 };

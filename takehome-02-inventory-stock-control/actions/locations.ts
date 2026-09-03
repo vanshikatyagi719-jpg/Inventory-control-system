@@ -23,14 +23,12 @@ export interface StaffUser {
   email: string;
 }
 
-// 1. GET ALL LOCATIONS WITH ASSIGNED STAFF & CURRENT USER PERMISSIONS (Goal 5)
 export async function getLocationsWithStaff() {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   const currentUserId = user?.id;
 
-  // 1. Get current user's role
   let userRole: 'manager' | 'staff' = 'staff';
   if (currentUserId) {
     const { data: profile } = await supabase
@@ -41,7 +39,6 @@ export async function getLocationsWithStaff() {
     if (profile?.role === 'manager') userRole = 'manager';
   }
 
-  // 2. Fetch all locations
   const { data: locations, error: locError } = await supabase
     .from('locations')
     .select('id, name, code, is_active, created_at')
@@ -52,12 +49,10 @@ export async function getLocationsWithStaff() {
     return { locations: [], staffUsers: [], userRole, currentUserId };
   }
 
-  // 3. Fetch all location assignments
   const { data: assignments } = await supabase
     .from('location_assignments')
     .select('user_id, location_id');
 
-  // 4. Fetch all staff profiles
   const { data: staffProfiles } = await supabase
     .from('profiles')
     .select('id, full_name, email, role')
@@ -68,7 +63,6 @@ export async function getLocationsWithStaff() {
     .filter((p) => p.role === 'staff')
     .map((p) => ({ id: p.id, full_name: p.full_name, email: p.email }));
 
-  // Map assignments to locations
   const enrichedLocations: LocationWithStaff[] = locations.map((loc) => {
     const assignedUserIds = assignments
       ?.filter((a) => a.location_id === loc.id)
@@ -98,7 +92,6 @@ export async function getLocationsWithStaff() {
   };
 }
 
-// 2. CREATE NEW LOCATION (Manager Only - Goal 1 & 5)
 export async function createLocationAction(formData: FormData) {
   const supabase = await createClient();
 
@@ -145,7 +138,6 @@ export async function createLocationAction(formData: FormData) {
   return { success: true };
 }
 
-// 3. UPDATE STAFF ASSIGNMENTS FOR A LOCATION (Manager Only - Goal 5)
 export async function updateLocationStaffAssignmentsAction(locationId: string, staffUserIds: string[]) {
   const supabase = await createClient();
 
@@ -162,7 +154,6 @@ export async function updateLocationStaffAssignmentsAction(locationId: string, s
     return { error: 'Permission Denied: Only inventory managers can update staff assignments.' };
   }
 
-  // 1. Delete existing assignments for this location
   const { error: deleteError } = await supabase
     .from('location_assignments')
     .delete()
@@ -172,7 +163,6 @@ export async function updateLocationStaffAssignmentsAction(locationId: string, s
     return { error: deleteError.message };
   }
 
-  // 2. Insert new assignments
   if (staffUserIds.length > 0) {
     const recordsToInsert = staffUserIds.map((userId) => ({
       location_id: locationId,
@@ -193,7 +183,6 @@ export async function updateLocationStaffAssignmentsAction(locationId: string, s
   return { success: true };
 }
 
-// 4. TOGGLE LOCATION ACTIVE STATUS (Manager Only)
 export async function toggleLocationActiveAction(locationId: string, isActive: boolean) {
   const supabase = await createClient();
 

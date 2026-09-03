@@ -30,26 +30,27 @@ export default async function MovementsPage({
     <main
       style={{
         minHeight: '100vh',
-        backgroundColor: '#f5f7fa',
-        padding: '30px 40px',
-        fontFamily: 'Arial, sans-serif',
+        backgroundColor: '#f8fafc',
+        padding: '36px 48px',
+        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
       }}
     >
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      <div style={{ maxWidth: '1240px', margin: '0 auto' }}>
         
-        {/* Header */}
         <header
           style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '24px',
+            marginBottom: '28px',
           }}
         >
           <div>
-            <h1 style={{ margin: 0, fontSize: '28px', color: '#111827' }}>Stock Movement Ledger</h1>
-            <p style={{ margin: '4px 0 0', color: '#6b7280', fontSize: '14px' }}>
-              Append-only audit ledger of every unit received, issued, transferred, or adjusted (Goal 3 & 4)
+            <h1 style={{ margin: 0, fontSize: '26px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
+              Stock Movement Ledger
+            </h1>
+            <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '14px' }}>
+              Append-only audit ledger of units received, issued, transferred, or adjusted.
             </p>
           </div>
 
@@ -57,13 +58,13 @@ export default async function MovementsPage({
             <Link
               href="/movements/record"
               style={{
-                padding: '10px 18px',
+                padding: '10px 20px',
                 backgroundColor: '#2563eb',
                 color: 'white',
                 textDecoration: 'none',
-                borderRadius: '6px',
-                fontWeight: 'bold',
-                fontSize: '14px',
+                borderRadius: '8px',
+                fontWeight: 600,
+                fontSize: '13px',
               }}
             >
               + Record Movement
@@ -72,24 +73,23 @@ export default async function MovementsPage({
           </div>
         </header>
 
-        {/* Navigation Bar */}
-        <nav style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+        <nav style={{ display: 'flex', gap: '8px', marginBottom: '32px', flexWrap: 'wrap' }}>
           <Link href="/" style={navStyle}>Dashboard</Link>
-          <Link href="/items" style={navStyle}>Items</Link>
-          <Link href="/locations" style={navStyle}>Locations</Link>
-          <Link href="/movements" style={{ ...navStyle, backgroundColor: '#2563eb', color: 'white', borderColor: '#2563eb' }}>Stock Movements</Link>
+          <Link href="/items" style={navStyle}>Items Catalog</Link>
+          <Link href="/locations" style={navStyle}>Locations & Staff</Link>
+          <Link href="/movements" style={{ ...navStyle, backgroundColor: '#0f172a', color: 'white', borderColor: '#0f172a' }}>Stock Movements</Link>
           <Link href="/alerts" style={navStyle}>Low-Stock Alerts</Link>
           <Link href="/import-export" style={navStyle}>Bulk CSV</Link>
         </nav>
 
-        {/* Filter Bar */}
         <div
           style={{
             backgroundColor: 'white',
-            padding: '16px 20px',
-            borderRadius: '8px',
-            border: '1px solid #e5e7eb',
-            marginBottom: '20px',
+            padding: '20px 24px',
+            borderRadius: '10px',
+            border: '1px solid #e2e8f0',
+            marginBottom: '24px',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
           }}
         >
           <form method="GET" action="/movements" style={{ display: 'flex', gap: '16px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
@@ -100,8 +100,8 @@ export default async function MovementsPage({
                 <option value="">All Types</option>
                 <option value="receipt">Receipts (+)</option>
                 <option value="issue">Issues (-)</option>
-                <option value="transfer">Transfers (⇄)</option>
-                <option value="adjustment">Adjustments (±)</option>
+                <option value="transfer">Transfers</option>
+                <option value="adjustment">Adjustments</option>
               </select>
             </div>
 
@@ -121,11 +121,11 @@ export default async function MovementsPage({
               type="submit"
               style={{
                 padding: '9px 18px',
-                backgroundColor: '#1f2937',
+                backgroundColor: '#0f172a',
                 color: 'white',
                 border: 'none',
                 borderRadius: '6px',
-                fontWeight: 'bold',
+                fontWeight: 600,
                 fontSize: '13px',
                 cursor: 'pointer',
               }}
@@ -136,26 +136,25 @@ export default async function MovementsPage({
             {(locationId || movementType) && (
               <Link
                 href="/movements"
-                style={{ fontSize: '13px', color: '#2563eb', textDecoration: 'none', fontWeight: 'bold', alignSelf: 'center' }}
+                style={{ fontSize: '13px', color: '#2563eb', textDecoration: 'none', fontWeight: 600, alignSelf: 'center' }}
               >
-                Clear Filters ✕
+                Clear Filters
               </Link>
             )}
           </form>
         </div>
 
-        {/* Ledger Table (Goal 4: Immutable) */}
         <div
           style={{
             backgroundColor: 'white',
-            borderRadius: '8px',
-            border: '1px solid #e5e7eb',
+            borderRadius: '10px',
+            border: '1px solid #e2e8f0',
             overflow: 'hidden',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
           }}
         >
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
-            <thead style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb', color: '#4b5563', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <thead style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               <tr>
                 <th style={{ padding: '12px 16px' }}>Timestamp</th>
                 <th style={{ padding: '12px 16px' }}>Kind</th>
@@ -169,7 +168,7 @@ export default async function MovementsPage({
             <tbody>
               {movements.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ padding: '36px', textAlign: 'center', color: '#9ca3af' }}>
+                  <td colSpan={7} style={{ padding: '36px', textAlign: 'center', color: '#94a3b8' }}>
                     No stock movements found matching criteria.
                   </td>
                 </tr>
@@ -186,51 +185,51 @@ export default async function MovementsPage({
                   } else if (mov.movement_type === 'transfer') {
                     typeColor = '#4338ca';
                     typeBg = '#e0e7ff';
-                    sign = '⇄ ';
+                    sign = 'Transfer: ';
                   } else if (mov.movement_type === 'adjustment') {
-                    typeColor = '#b45309';
+                    typeColor = '#d97706';
                     typeBg = '#fef3c7';
                     sign = mov.adjustment_direction === 'decrease' ? '-' : '+';
                   }
 
                   return (
-                    <tr key={mov.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                      <td style={{ padding: '12px 16px', color: '#4b5563', whiteSpace: 'nowrap' }}>
+                    <tr key={mov.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      <td style={{ padding: '12px 16px', color: '#64748b', whiteSpace: 'nowrap' }}>
                         {new Date(mov.created_at).toLocaleDateString()} {new Date(mov.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </td>
 
                       <td style={{ padding: '12px 16px' }}>
-                        <span style={{ backgroundColor: typeBg, color: typeColor, padding: '3px 8px', borderRadius: '4px', fontWeight: 'bold', fontSize: '11px', textTransform: 'uppercase' }}>
+                        <span style={{ backgroundColor: typeBg, color: typeColor, padding: '3px 8px', borderRadius: '4px', fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' }}>
                           {mov.movement_type}
                         </span>
                       </td>
 
                       <td style={{ padding: '12px 16px' }}>
-                        <Link href={`/items/${mov.item_id}`} style={{ fontWeight: 'bold', color: '#2563eb', textDecoration: 'none' }}>
+                        <Link href={`/items/${mov.item_id}`} style={{ fontWeight: 600, color: '#2563eb', textDecoration: 'none' }}>
                           [{mov.items?.sku}]
                         </Link>{' '}
-                        <span style={{ color: '#111827' }}>{mov.items?.name}</span>
+                        <span style={{ color: '#0f172a' }}>{mov.items?.name}</span>
                       </td>
 
-                      <td style={{ padding: '12px 16px', fontWeight: 'bold', color: typeColor, fontSize: '14px' }}>
-                        {sign}{mov.quantity} <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: 'normal' }}>{mov.items?.unit_of_measure}</span>
+                      <td style={{ padding: '12px 16px', fontWeight: 700, color: typeColor, fontSize: '14px' }}>
+                        {sign}{mov.quantity} <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 400 }}>{mov.items?.unit_of_measure}</span>
                       </td>
 
-                      <td style={{ padding: '12px 16px', color: '#374151' }}>
+                      <td style={{ padding: '12px 16px', color: '#334155' }}>
                         {mov.movement_type === 'transfer' ? (
                           <span>
-                            <strong>{mov.location?.code}</strong> → <strong>{mov.dest_location?.code}</strong>
+                            <strong>{mov.location?.code}</strong> &rarr; <strong>{mov.dest_location?.code}</strong>
                           </span>
                         ) : (
                           <span><strong>{mov.location?.name}</strong> ({mov.location?.code})</span>
                         )}
                       </td>
 
-                      <td style={{ padding: '12px 16px', color: '#4b5563', fontStyle: mov.reason ? 'normal' : 'italic' }}>
-                        {mov.reason || '—'}
+                      <td style={{ padding: '12px 16px', color: '#64748b' }}>
+                        {mov.reason || 'None'}
                       </td>
 
-                      <td style={{ padding: '12px 16px', color: '#4b5563', fontSize: '12px' }}>
+                      <td style={{ padding: '12px 16px', color: '#64748b', fontSize: '12px' }}>
                         {mov.profiles?.full_name || mov.profiles?.email || 'Unknown'}
                       </td>
                     </tr>
@@ -241,7 +240,6 @@ export default async function MovementsPage({
           </table>
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '24px' }}>
             {page > 1 && (
@@ -249,11 +247,11 @@ export default async function MovementsPage({
                 href={`/movements?type=${movementType}&location=${locationId}&page=${page - 1}`}
                 style={paginationBtnStyle}
               >
-                ← Previous
+                &larr; Previous
               </Link>
             )}
 
-            <span style={{ padding: '8px 16px', fontSize: '14px', color: '#4b5563', display: 'flex', alignItems: 'center' }}>
+            <span style={{ padding: '8px 16px', fontSize: '14px', color: '#475569', display: 'flex', alignItems: 'center' }}>
               Page {page} of {totalPages}
             </span>
 
@@ -262,7 +260,7 @@ export default async function MovementsPage({
                 href={`/movements?type=${movementType}&location=${locationId}&page=${page + 1}`}
                 style={paginationBtnStyle}
               >
-                Next →
+                Next &rarr;
               </Link>
             )}
           </div>
@@ -273,30 +271,32 @@ export default async function MovementsPage({
   );
 }
 
-const navStyle = {
+const navStyle: React.CSSProperties = {
   textDecoration: 'none',
-  padding: '10px 16px',
+  padding: '8px 16px',
   backgroundColor: 'white',
-  border: '1px solid #ddd',
-  borderRadius: '6px',
-  color: '#333',
-  fontSize: '14px',
-  fontWeight: '500',
+  border: '1px solid #e2e8f0',
+  borderRadius: '8px',
+  color: '#475569',
+  fontSize: '13px',
+  fontWeight: 600,
+  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)',
 };
 
 const labelStyle: React.CSSProperties = {
   display: 'block',
   fontSize: '11px',
-  fontWeight: 'bold',
-  color: '#374151',
+  fontWeight: 700,
+  color: '#334155',
   marginBottom: '4px',
   textTransform: 'uppercase',
+  letterSpacing: '0.05em',
 };
 
 const inputStyle: React.CSSProperties = {
   padding: '8px 12px',
   borderRadius: '6px',
-  border: '1px solid #d1d5db',
+  border: '1px solid #cbd5e1',
   fontSize: '13px',
   backgroundColor: 'white',
 };
@@ -304,10 +304,10 @@ const inputStyle: React.CSSProperties = {
 const paginationBtnStyle: React.CSSProperties = {
   padding: '8px 16px',
   backgroundColor: 'white',
-  border: '1px solid #d1d5db',
+  border: '1px solid #cbd5e1',
   borderRadius: '6px',
-  color: '#1f2937',
+  color: '#0f172a',
   textDecoration: 'none',
   fontSize: '13px',
-  fontWeight: 'bold',
+  fontWeight: 600,
 };

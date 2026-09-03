@@ -43,26 +43,27 @@ export default async function ItemsPage({
     <main
       style={{
         minHeight: '100vh',
-        backgroundColor: '#f5f7fa',
-        padding: '30px 40px',
-        fontFamily: 'Arial, sans-serif',
+        backgroundColor: '#f8fafc',
+        padding: '36px 48px',
+        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
       }}
     >
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      <div style={{ maxWidth: '1240px', margin: '0 auto' }}>
         
-        {/* Header */}
         <header
           style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '24px',
+            marginBottom: '28px',
           }}
         >
           <div>
-            <h1 style={{ margin: 0, fontSize: '28px', color: '#111827' }}>Items & Inventory Catalog</h1>
-            <p style={{ margin: '4px 0 0', color: '#6b7280', fontSize: '14px' }}>
-              Search, filter, and track real-time stock across all locations
+            <h1 style={{ margin: 0, fontSize: '26px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
+              Items & Inventory Catalog
+            </h1>
+            <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '14px' }}>
+              Search, filter, and track real-time stock across all locations.
             </p>
           </div>
 
@@ -71,13 +72,13 @@ export default async function ItemsPage({
               <Link
                 href="/items/new"
                 style={{
-                  padding: '10px 18px',
+                  padding: '10px 20px',
                   backgroundColor: '#2563eb',
                   color: 'white',
                   textDecoration: 'none',
-                  borderRadius: '6px',
-                  fontWeight: 'bold',
-                  fontSize: '14px',
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                  fontSize: '13px',
                 }}
               >
                 + Create New Item
@@ -87,29 +88,27 @@ export default async function ItemsPage({
           </div>
         </header>
 
-        {/* Navigation Bar */}
-        <nav style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+        <nav style={{ display: 'flex', gap: '8px', marginBottom: '32px', flexWrap: 'wrap' }}>
           <Link href="/" style={navStyle}>Dashboard</Link>
-          <Link href="/items" style={{ ...navStyle, backgroundColor: '#2563eb', color: 'white', borderColor: '#2563eb' }}>Items</Link>
-          <Link href="/locations" style={navStyle}>Locations</Link>
+          <Link href="/items" style={{ ...navStyle, backgroundColor: '#0f172a', color: 'white', borderColor: '#0f172a' }}>Items Catalog</Link>
+          <Link href="/locations" style={navStyle}>Locations & Staff</Link>
           <Link href="/movements" style={navStyle}>Stock Movements</Link>
           <Link href="/alerts" style={navStyle}>Low-Stock Alerts</Link>
           <Link href="/import-export" style={navStyle}>Bulk CSV</Link>
         </nav>
 
-        {/* Filter & Search Form (Goal 6: Server-side filters) */}
         <div
           style={{
             backgroundColor: 'white',
-            padding: '20px',
-            borderRadius: '8px',
-            border: '1px solid #e5e7eb',
+            padding: '24px',
+            borderRadius: '10px',
+            border: '1px solid #e2e8f0',
             marginBottom: '24px',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
           }}
         >
           <form method="GET" action="/items" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', alignItems: 'end' }}>
             
-            {/* Search Input */}
             <div>
               <label style={labelStyle}>Search Name or SKU</label>
               <input
@@ -121,7 +120,6 @@ export default async function ItemsPage({
               />
             </div>
 
-            {/* Category Filter */}
             <div>
               <label style={labelStyle}>Category</label>
               <select name="category" defaultValue={categoryId} style={inputStyle}>
@@ -132,7 +130,6 @@ export default async function ItemsPage({
               </select>
             </div>
 
-            {/* Location Filter */}
             <div>
               <label style={labelStyle}>Location Filter</label>
               <select name="location" defaultValue={locationId} style={inputStyle}>
@@ -143,7 +140,6 @@ export default async function ItemsPage({
               </select>
             </div>
 
-            {/* Archive Status Filter */}
             <div>
               <label style={labelStyle}>Archive Status</label>
               <select name="status" defaultValue={status} style={inputStyle}>
@@ -153,7 +149,6 @@ export default async function ItemsPage({
               </select>
             </div>
 
-            {/* Sort By */}
             <div>
               <label style={labelStyle}>Sort By</label>
               <div style={{ display: 'flex', gap: '6px' }}>
@@ -170,9 +165,8 @@ export default async function ItemsPage({
               </div>
             </div>
 
-            {/* Low Stock Toggle & Submit */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#b45309', fontWeight: 'bold', cursor: 'pointer' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#b45309', fontWeight: 600, cursor: 'pointer' }}>
                 <input
                   type="checkbox"
                   name="lowStock"
@@ -186,11 +180,11 @@ export default async function ItemsPage({
                 type="submit"
                 style={{
                   padding: '9px 16px',
-                  backgroundColor: '#1f2937',
+                  backgroundColor: '#0f172a',
                   color: 'white',
                   border: 'none',
                   borderRadius: '6px',
-                  fontWeight: 'bold',
+                  fontWeight: 600,
                   fontSize: '13px',
                   cursor: 'pointer',
                 }}
@@ -201,34 +195,32 @@ export default async function ItemsPage({
           </form>
         </div>
 
-        {/* Results Summary Bar */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-          <p style={{ margin: 0, fontSize: '14px', color: '#4b5563' }}>
-            Found <strong style={{ color: '#111827' }}>{totalMatches}</strong> matching items (Page {page} of {totalPages})
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <p style={{ margin: 0, fontSize: '14px', color: '#475569' }}>
+            Found <strong style={{ color: '#0f172a' }}>{totalMatches}</strong> matching items (Page {page} of {totalPages})
           </p>
 
           {(search || categoryId || locationId || status !== 'active' || lowStockOnly) && (
             <Link
               href="/items"
-              style={{ fontSize: '13px', color: '#2563eb', textDecoration: 'none', fontWeight: 'bold' }}
+              style={{ fontSize: '13px', color: '#2563eb', textDecoration: 'none', fontWeight: 600 }}
             >
-              Clear All Filters ✕
+              Clear All Filters
             </Link>
           )}
         </div>
 
-        {/* Items Data Table (Goal 6) */}
         <div
           style={{
             backgroundColor: 'white',
-            borderRadius: '8px',
-            border: '1px solid #e5e7eb',
+            borderRadius: '10px',
+            border: '1px solid #e2e8f0',
             overflow: 'hidden',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
           }}
         >
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
-            <thead style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb', color: '#4b5563', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
+            <thead style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               <tr>
                 <th style={{ padding: '12px 16px' }}>SKU</th>
                 <th style={{ padding: '12px 16px' }}>Name & Description</th>
@@ -242,57 +234,57 @@ export default async function ItemsPage({
             <tbody>
               {items.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ padding: '36px', textAlign: 'center', color: '#9ca3af' }}>
+                  <td colSpan={7} style={{ padding: '36px', textAlign: 'center', color: '#94a3b8' }}>
                     No items match your search or filter criteria.
                   </td>
                 </tr>
               ) : (
                 items.map((item) => (
-                  <tr key={item.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                    <td style={{ padding: '14px 16px', fontWeight: 'bold', color: '#111827', fontFamily: 'monospace' }}>
+                  <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '14px 16px', fontWeight: 700, color: '#0f172a', fontFamily: 'monospace' }}>
                       {item.sku}
                     </td>
 
                     <td style={{ padding: '14px 16px' }}>
-                      <div style={{ fontWeight: 'bold', color: '#111827' }}>{item.name}</div>
+                      <div style={{ fontWeight: 600, color: '#0f172a' }}>{item.name}</div>
                       {item.description && (
-                        <div style={{ fontSize: '12px', color: '#6b7280', maxWidth: '320px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <div style={{ fontSize: '12px', color: '#64748b', maxWidth: '320px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {item.description}
                         </div>
                       )}
                     </td>
 
-                    <td style={{ padding: '14px 16px', color: '#374151' }}>
-                      <span style={{ backgroundColor: '#f3f4f6', padding: '3px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: '500' }}>
+                    <td style={{ padding: '14px 16px', color: '#334155' }}>
+                      <span style={{ backgroundColor: '#f1f5f9', padding: '3px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 500 }}>
                         {item.category_name}
                       </span>
                     </td>
 
                     <td style={{ padding: '14px 16px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontWeight: 'bold', fontSize: '16px', color: item.is_low_stock ? '#dc2626' : '#111827' }}>
+                        <span style={{ fontWeight: 700, fontSize: '15px', color: item.is_low_stock ? '#dc2626' : '#0f172a' }}>
                           {locationId ? item.location_on_hand : item.total_on_hand}
                         </span>
-                        <span style={{ fontSize: '12px', color: '#6b7280' }}>{item.unit_of_measure}</span>
+                        <span style={{ fontSize: '12px', color: '#64748b' }}>{item.unit_of_measure}</span>
                         {item.is_low_stock && (
-                          <span style={{ backgroundColor: '#fee2e2', color: '#b91c1c', padding: '2px 6px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>
+                          <span style={{ backgroundColor: '#fee2e2', color: '#b91c1c', padding: '2px 6px', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>
                             LOW STOCK
                           </span>
                         )}
                       </div>
                     </td>
 
-                    <td style={{ padding: '14px 16px', color: '#4b5563', fontSize: '13px' }}>
+                    <td style={{ padding: '14px 16px', color: '#475569', fontSize: '13px' }}>
                       {item.reorder_level} {item.unit_of_measure}
                     </td>
 
                     <td style={{ padding: '14px 16px' }}>
                       {item.is_archived ? (
-                        <span style={{ backgroundColor: '#f3f4f6', color: '#6b7280', padding: '3px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
+                        <span style={{ backgroundColor: '#f1f5f9', color: '#64748b', padding: '3px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 600 }}>
                           Archived
                         </span>
                       ) : (
-                        <span style={{ backgroundColor: '#ecfdf5', color: '#047857', padding: '3px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
+                        <span style={{ backgroundColor: '#ecfdf5', color: '#047857', padding: '3px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 600 }}>
                           Active
                         </span>
                       )}
@@ -304,15 +296,15 @@ export default async function ItemsPage({
                         style={{
                           display: 'inline-block',
                           padding: '6px 12px',
-                          backgroundColor: '#f3f4f6',
-                          color: '#1f2937',
-                          borderRadius: '4px',
+                          backgroundColor: '#f1f5f9',
+                          color: '#0f172a',
+                          borderRadius: '6px',
                           textDecoration: 'none',
                           fontSize: '12px',
-                          fontWeight: 'bold',
+                          fontWeight: 600,
                         }}
                       >
-                        View Details →
+                        View Details &rarr;
                       </Link>
                     </td>
                   </tr>
@@ -322,7 +314,6 @@ export default async function ItemsPage({
           </table>
         </div>
 
-        {/* Pagination Bar (Goal 6) */}
         {totalPages > 1 && (
           <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '24px' }}>
             {page > 1 && (
@@ -330,11 +321,11 @@ export default async function ItemsPage({
                 href={`/items?search=${encodeURIComponent(search)}&category=${encodeURIComponent(categoryId)}&location=${encodeURIComponent(locationId)}&status=${status}&lowStock=${lowStockOnly}&sortBy=${sortBy}&sortDir=${sortDir}&page=${page - 1}`}
                 style={paginationBtnStyle}
               >
-                ← Previous
+                &larr; Previous
               </Link>
             )}
 
-            <span style={{ padding: '8px 16px', fontSize: '14px', color: '#4b5563', display: 'flex', alignItems: 'center' }}>
+            <span style={{ padding: '8px 16px', fontSize: '14px', color: '#475569', display: 'flex', alignItems: 'center' }}>
               Page {page} of {totalPages}
             </span>
 
@@ -343,7 +334,7 @@ export default async function ItemsPage({
                 href={`/items?search=${encodeURIComponent(search)}&category=${encodeURIComponent(categoryId)}&location=${encodeURIComponent(locationId)}&status=${status}&lowStock=${lowStockOnly}&sortBy=${sortBy}&sortDir=${sortDir}&page=${page + 1}`}
                 style={paginationBtnStyle}
               >
-                Next →
+                Next &rarr;
               </Link>
             )}
           </div>
@@ -354,32 +345,33 @@ export default async function ItemsPage({
   );
 }
 
-const navStyle = {
+const navStyle: React.CSSProperties = {
   textDecoration: 'none',
-  padding: '10px 16px',
+  padding: '8px 16px',
   backgroundColor: 'white',
-  border: '1px solid #ddd',
-  borderRadius: '6px',
-  color: '#333',
-  fontSize: '14px',
-  fontWeight: '500',
+  border: '1px solid #e2e8f0',
+  borderRadius: '8px',
+  color: '#475569',
+  fontSize: '13px',
+  fontWeight: 600,
+  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)',
 };
 
 const labelStyle: React.CSSProperties = {
   display: 'block',
-  fontSize: '12px',
-  fontWeight: 'bold',
-  color: '#374151',
+  fontSize: '11px',
+  fontWeight: 700,
+  color: '#334155',
   marginBottom: '6px',
   textTransform: 'uppercase',
-  letterSpacing: '0.025em',
+  letterSpacing: '0.05em',
 };
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '8px 12px',
   borderRadius: '6px',
-  border: '1px solid #d1d5db',
+  border: '1px solid #cbd5e1',
   fontSize: '13px',
   backgroundColor: 'white',
   boxSizing: 'border-box',
@@ -388,10 +380,10 @@ const inputStyle: React.CSSProperties = {
 const paginationBtnStyle: React.CSSProperties = {
   padding: '8px 16px',
   backgroundColor: 'white',
-  border: '1px solid #d1d5db',
+  border: '1px solid #cbd5e1',
   borderRadius: '6px',
-  color: '#1f2937',
+  color: '#0f172a',
   textDecoration: 'none',
   fontSize: '13px',
-  fontWeight: 'bold',
+  fontWeight: 600,
 };
