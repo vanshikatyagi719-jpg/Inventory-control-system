@@ -216,20 +216,22 @@ export async function getItemById(id: string) {
     return null;
   }
 
-  const { data: locations } = await supabase
-    .from('locations')
-    .select('id, name, code')
-    .eq('is_active', true)
-    .order('name');
-
-  const { data: rawMovements } = await supabase
-    .from('stock_movements')
-    .select('id, movement_type, adjustment_direction, quantity, location_id, destination_location_id, reason, created_at, recorded_by')
-    .eq('item_id', id)
-    .order('created_at', { ascending: false });
+  const [
+    { data: locations },
+    { data: rawMovements },
+    { data: rawAuditLogs },
+    { data: rawNotes },
+  ] = await Promise.all([
+    supabase.from('locations').select('id, name, code').eq('is_active', true).order('name'),
+    supabase.from('stock_movements').select('id, movement_type, adjustment_direction, quantity, location_id, destination_location_id, reason, created_at, recorded_by').eq('item_id', id).order('created_at', { ascending: false }),
+    supabase.from('item_audit_logs').select('id, field_name, old_value, new_value, created_at, changed_by').eq('item_id', id).order('created_at', { ascending: false }),
+    supabase.from('item_notes').select('id, note, created_at, author_id').eq('item_id', id).order('created_at', { ascending: false }),
+  ]);
 
   const userIds = Array.from(new Set([
     ...(rawMovements?.map((m) => m.recorded_by) || []),
+    ...(rawAuditLogs?.map((a) => a.changed_by).filter(Boolean) as string[] || []),
+    ...(rawNotes?.map((n) => n.author_id).filter(Boolean) as string[] || []),
   ]));
 
   const { data: profiles } = await supabase
@@ -275,40 +277,14 @@ export async function getItemById(id: string) {
     });
   });
 
-  const { data: rawAuditLogs } = await supabase
-    .from('item_audit_logs')
-    .select('id, field_name, old_value, new_value, created_at, changed_by')
-    .eq('item_id', id)
-    .order('created_at', { ascending: false });
-
-  const { data: rawNotes } = await supabase
-    .from('item_notes')
-    .select('id, note, created_at, author_id')
-    .eq('item_id', id)
-    .order('created_at', { ascending: false });
-
-  const extraUserIds = Array.from(new Set([
-    ...(rawAuditLogs?.map((a) => a.changed_by).filter(Boolean) as string[] || []),
-    ...(rawNotes?.map((n) => n.author_id).filter(Boolean) as string[] || []),
-  ]));
-
-  let extraProfileMap = profileMap;
-  if (extraUserIds.length > 0) {
-    const { data: extraProfiles } = await supabase
-      .from('profiles')
-      .select('id, full_name, email')
-      .in('id', extraUserIds);
-    extraProfiles?.forEach((p) => extraProfileMap.set(p.id, p));
-  }
-
   const auditLogs = (rawAuditLogs || []).map((log) => ({
     ...log,
-    profiles: log.changed_by ? extraProfileMap.get(log.changed_by) : null,
+    profiles: log.changed_by ? profileMap.get(log.changed_by) : null,
   }));
 
   const notes = (rawNotes || []).map((note) => ({
     ...note,
-    profiles: note.author_id ? extraProfileMap.get(note.author_id) : null,
+    profiles: note.author_id ? profileMap.get(note.author_id) : null,
   }));
 
   return {

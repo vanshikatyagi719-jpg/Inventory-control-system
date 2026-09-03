@@ -2,6 +2,7 @@
 
 import { createClient } from '../lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 
 export interface LocationWithStaff {
   id: string;
@@ -26,39 +27,27 @@ export interface StaffUser {
 export async function getLocationsWithStaff() {
   const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
-  const currentUserId = user?.id;
+  const [{ data: authData }, { data: locations, error: locError }, { data: assignments }, { data: staffProfiles }] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase.from('locations').select('id, name, code, is_active, created_at').order('name'),
+    supabase.from('location_assignments').select('user_id, location_id'),
+    supabase.from('profiles').select('id, full_name, email, role').order('full_name'),
+  ]);
+
+  const currentUserId = authData?.user?.id;
+  const staffMap = new Map(staffProfiles?.map((p) => [p.id, p]));
 
   let userRole: 'manager' | 'staff' = 'staff';
   if (currentUserId) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', currentUserId)
-      .single();
-    if (profile?.role === 'manager') userRole = 'manager';
+    const p = staffMap.get(currentUserId);
+    if (p?.role === 'manager') userRole = 'manager';
   }
-
-  const { data: locations, error: locError } = await supabase
-    .from('locations')
-    .select('id, name, code, is_active, created_at')
-    .order('name');
 
   if (locError || !locations) {
     console.error('Error fetching locations:', locError?.message);
     return { locations: [], staffUsers: [], userRole, currentUserId };
   }
 
-  const { data: assignments } = await supabase
-    .from('location_assignments')
-    .select('user_id, location_id');
-
-  const { data: staffProfiles } = await supabase
-    .from('profiles')
-    .select('id, full_name, email, role')
-    .order('full_name');
-
-  const staffMap = new Map(staffProfiles?.map((p) => [p.id, p]));
   const staffUsers: StaffUser[] = (staffProfiles || [])
     .filter((p) => p.role === 'staff')
     .map((p) => ({ id: p.id, full_name: p.full_name, email: p.email }));
@@ -92,11 +81,11 @@ export async function getLocationsWithStaff() {
   };
 }
 
-export async function createLocationAction(formData: FormData) {
+export async function createLocationAction(formData: FormData): Promise<void> {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: 'You must be signed in.' };
+  if (!user) return;
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -105,17 +94,17 @@ export async function createLocationAction(formData: FormData) {
     .single();
 
   if (profile?.role !== 'manager') {
-    return { error: 'Permission Denied: Only inventory managers can create locations.' };
+    return;
   }
 
   const name = (formData.get('name') as string)?.trim();
   const code = (formData.get('code') as string)?.trim().toUpperCase();
 
   if (!name || !code) {
-    return { error: 'Location Name and Unique Code are required.' };
+    return;
   }
 
-  const { error } = await supabase
+  await supabase
     .from('locations')
     .insert({
       name,
@@ -123,26 +112,18 @@ export async function createLocationAction(formData: FormData) {
       is_active: true,
     });
 
-  if (error) {
-    if (error.code === '23505') {
-      return { error: `Location code "${code}" already exists. Please choose a unique code.` };
-    }
-    return { error: error.message };
-  }
-
   revalidatePath('/locations');
   revalidatePath('/movements/record');
   revalidatePath('/items');
   revalidatePath('/');
-
-  return { success: true };
+  redirect('/locations');
 }
 
-export async function createStaffMemberAction(formData: FormData) {
+export async function createStaffMemberAction(formData: FormData): Promise<void> {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: 'You must be signed in.' };
+  if (!user) return;
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -151,19 +132,15 @@ export async function createStaffMemberAction(formData: FormData) {
     .single();
 
   if (profile?.role !== 'manager') {
-    return { error: 'Permission Denied: Only inventory managers can register new staff members.' };
+    return;
   }
 
   const fullName = (formData.get('full_name') as string)?.trim();
   const email = (formData.get('email') as string)?.trim().toLowerCase();
   const password = (formData.get('password') as string)?.trim();
 
-  if (!fullName || !email || !password) {
-    return { error: 'Full Name, Email, and Password are required.' };
-  }
-
-  if (password.length < 6) {
-    return { error: 'Password must be at least 6 characters.' };
+  if (!fullName || !email || !password || password.length < 6) {
+    return;
   }
 
   const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -178,10 +155,10 @@ export async function createStaffMemberAction(formData: FormData) {
   });
 
   if (authError || !authData.user) {
-    return { error: authError?.message || 'Failed to create staff user.' };
+    return;
   }
 
-  const { error: profileError } = await supabase
+  await supabase
     .from('profiles')
     .upsert({
       id: authData.user.id,
@@ -190,21 +167,16 @@ export async function createStaffMemberAction(formData: FormData) {
       role: 'staff',
     });
 
-  if (profileError) {
-    return { error: profileError.message };
-  }
-
   revalidatePath('/locations');
   revalidatePath('/movements/record');
-
-  return { success: true };
+  redirect('/locations');
 }
 
-export async function updateLocationStaffAssignmentsAction(locationId: string, staffUserIds: string[]) {
+export async function updateLocationStaffAssignmentsAction(formData: FormData): Promise<void> {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: 'You must be signed in.' };
+  if (!user) return;
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -213,17 +185,16 @@ export async function updateLocationStaffAssignmentsAction(locationId: string, s
     .single();
 
   if (profile?.role !== 'manager') {
-    return { error: 'Permission Denied: Only inventory managers can update staff assignments.' };
+    return;
   }
 
-  const { error: deleteError } = await supabase
+  const locationId = formData.get('location_id') as string;
+  const staffUserIds = formData.getAll('staff_ids') as string[];
+
+  await supabase
     .from('location_assignments')
     .delete()
     .eq('location_id', locationId);
-
-  if (deleteError) {
-    return { error: deleteError.message };
-  }
 
   if (staffUserIds.length > 0) {
     const recordsToInsert = staffUserIds.map((userId) => ({
@@ -231,25 +202,21 @@ export async function updateLocationStaffAssignmentsAction(locationId: string, s
       user_id: userId,
     }));
 
-    const { error: insertError } = await supabase
+    await supabase
       .from('location_assignments')
       .insert(recordsToInsert);
-
-    if (insertError) {
-      return { error: insertError.message };
-    }
   }
 
   revalidatePath('/locations');
   revalidatePath('/movements/record');
-  return { success: true };
+  redirect('/locations');
 }
 
-export async function toggleLocationActiveAction(locationId: string, isActive: boolean) {
+export async function toggleLocationActiveAction(formData: FormData): Promise<void> {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: 'You must be signed in.' };
+  if (!user) return;
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -258,20 +225,20 @@ export async function toggleLocationActiveAction(locationId: string, isActive: b
     .single();
 
   if (profile?.role !== 'manager') {
-    return { error: 'Permission Denied: Only inventory managers can toggle location status.' };
+    return;
   }
 
-  const { error } = await supabase
+  const locationId = formData.get('location_id') as string;
+  const newStatus = formData.get('is_active') === 'true';
+
+  await supabase
     .from('locations')
-    .update({ is_active: isActive })
+    .update({ is_active: newStatus })
     .eq('id', locationId);
-
-  if (error) {
-    return { error: error.message };
-  }
 
   revalidatePath('/locations');
   revalidatePath('/movements/record');
   revalidatePath('/items');
-  return { success: true };
+  revalidatePath('/');
+  redirect('/locations');
 }
