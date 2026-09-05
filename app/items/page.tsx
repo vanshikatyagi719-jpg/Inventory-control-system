@@ -241,14 +241,18 @@ export default async function ItemsPage({
               ) : (
                 items.map((item) => (
                   <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '14px 16px', fontWeight: 700, color: '#0f172a', fontFamily: 'monospace' }}>
-                      {item.sku}
+                    <td style={{ padding: '14px 16px', fontWeight: 700, fontFamily: 'monospace' }}>
+                      <Link href={`/items/${item.id}`} style={{ color: '#0f172a', textDecoration: 'none' }}>
+                        {item.sku}
+                      </Link>
                     </td>
 
                     <td style={{ padding: '14px 16px' }}>
-                      <div style={{ fontWeight: 600, color: '#0f172a' }}>{item.name}</div>
+                      <Link href={`/items/${item.id}`} style={{ fontWeight: 600, color: '#2563eb', textDecoration: 'none' }}>
+                        {item.name}
+                      </Link>
                       {item.description && (
-                        <div style={{ fontSize: '12px', color: '#64748b', maxWidth: '320px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <div style={{ fontSize: '12px', color: '#64748b', maxWidth: '320px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
                           {item.description}
                         </div>
                       )}

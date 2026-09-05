@@ -46,7 +46,7 @@ export default async function ItemDetailPage({
 
   auditLogs.forEach((log: any) => {
     let title = `Changed ${log.field_name}`;
-    let details = `From "${log.old_value || 'None'}" &rarr; "${log.new_value || 'None'}"`;
+    let details = `From "${log.old_value || 'None'}" → "${log.new_value || 'None'}"`;
 
     if (log.field_name === 'item_created') {
       title = 'Item Created in System';
